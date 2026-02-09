@@ -1,11 +1,4 @@
-data "aws_ami" "amzn2" {
-  most_recent = true
-  owners      = ["amazon"]
 
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt"
   image_id      = data.aws_ami.amazon_linux2.id
@@ -20,6 +13,7 @@ resource "aws_launch_template" "lt" {
     db_host     = aws_db_instance.wordpress.endpoint
   }))
 }
+
 
 
 
