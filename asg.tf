@@ -15,7 +15,7 @@ resource "aws_launch_template" "lt" {
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   iam_instance_profile {
-    name = data.aws_iam_role.lab_role.name
+    name = "LabRole"
   }
 
   user_data = base64encode(templatefile("${path.module}/userdata.sh", {
