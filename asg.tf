@@ -1,16 +1,6 @@
-data "aws_ami" "amazon" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
-}
-
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt-"
-  image_id      = data.aws_ami.amazon.id
+  image_id      = data.aws_ami.amazon_linux_2.id  # Reuse same AMI
   instance_type = var.instance_type
   key_name      = var.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
@@ -37,9 +27,9 @@ resource "aws_autoscaling_group" "asg" {
 }
 
 resource "aws_autoscaling_policy" "cpu" {
-  name                    = "cpu-scale"
-  autoscaling_group_name  = aws_autoscaling_group.asg.name
-  policy_type             = "TargetTrackingScaling"
+  name                   = "cpu-scale"
+  autoscaling_group_name = aws_autoscaling_group.asg.name
+  policy_type            = "TargetTrackingScaling"
 
   target_tracking_configuration {
     predefined_metric_specification {
