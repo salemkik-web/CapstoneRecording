@@ -22,7 +22,7 @@ sudo systemctl enable httpd
 DBName="${db_name}"          # Terraform variable for DB name
 DBUser="${db_user}"          # Terraform variable for DB user
 DBPassword="${db_password}"  # Terraform variable for DB password
-DBHost="${rds_endpoint}" #Terraform variable for RDS endpoint
+DBHost="${db_host}"  #Terraform variable for RDS endpoint
 
 
 # -----------------------------
