@@ -24,7 +24,8 @@ resource "aws_launch_template" "wp_lt" {
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.profile.name
+    
+     name = "LabRole"
   }
 
   user_data = base64encode(templatefile("${path.module}/userdata.sh", {
