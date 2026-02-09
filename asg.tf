@@ -6,11 +6,9 @@ data "aws_ami" "amzn2" {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
-}
-
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt"
-  image_id      = data.aws_ami.amzn2.id
+  image_id      = data.aws_ami.amazon_linux2.id
   instance_type = var.instance_type
   key_name      = var.key_name
   security_group_names = [aws_security_group.ec2_sg.name]
@@ -22,6 +20,9 @@ resource "aws_launch_template" "lt" {
     db_host     = aws_db_instance.wordpress.endpoint
   }))
 }
+
+
+
 
 resource "aws_autoscaling_group" "asg" {
   desired_capacity     = 1
