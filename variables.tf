@@ -20,4 +20,4 @@ variable "instance_type" { default = "t3.micro" }
 variable "db_name" { default = "wordpress" }
 variable "db_user" { default = "admin" }
 variable "db_password" { default = "Password123!" }
-variable "key_name" {}
+variable "key_name" {default ="vockey"}
