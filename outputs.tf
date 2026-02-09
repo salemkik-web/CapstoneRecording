@@ -1,7 +1,11 @@
-output "alb_dns_name" {
+output "alb_url" {
   value = aws_lb.alb.dns_name
 }
+
+output "bastion_ip" {
+  value = aws_instance.bastion.public_ip
+}
+
 output "rds_endpoint" {
-  value       = aws_db_instance.wordpress.endpoint
-  description = "The RDS endpoint for WordPress"
+  value = aws_db_instance.wordpress.address
 }
