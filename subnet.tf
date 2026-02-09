@@ -10,3 +10,11 @@ resource "aws_subnet" "private" {
   cidr_block = var.private_subnet_cidr
   tags = { Name = "private-subnet" }
 }
+resource "aws_db_subnet_group" "wordpress" {
+  name       = "wordpress-db-subnet-group"
+  subnet_ids = [aws_subnet.private.id]
+
+  tags = {
+    Name = "WordPress DB Subnet Group"
+  }
+}
