@@ -1,11 +1,19 @@
-resource "aws_instance" "bastion" {
-  ami           = data.aws_ami.amazon.id
-  instance_type = var.instance_type
-  subnet_id     = aws_subnet.public.id  # Remove [0]
-  key_name      = var.key_name
-  vpc_security_group_ids = [aws_security_group.bastion_sg.id]
+data "aws_ami" "amzn2" {
+  most_recent = true
+  owners      = ["amazon"]
 
-  tags = {
-    Name = "bastion-host"
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
+}
+
+resource "aws_instance" "bastion" {
+  ami           = data.aws_ami.amzn2.id
+  instance_type = var.instance_type
+  subnet_id     = aws_subnet.public.id
+  key_name      = var.key_name
+  security_groups = [aws_security_group.bastion_sg.id]
+
+  tags = { Name = "bastion-host" }
 }

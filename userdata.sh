@@ -1,18 +1,17 @@
 #!/bin/bash
 sudo yum update -y
-sudo yum install -y httpd php php-cli php-fpm php-mysqlnd php-gd php-mbstring php-xml php-opcache php-intl php-soap php-json unzip wget curl mariadb
-sudo systemctl enable httpd
+sudo yum install -y httpd php php-cli php-mysqlnd php-gd php-mbstring php-xml unzip wget curl mariadb
+
 sudo systemctl start httpd
+sudo systemctl enable httpd
 
 DBName="${db_name}"
 DBUser="${db_user}"
 DBPassword="${db_password}"
 DBHost="${db_host}"
 
-sudo mkdir -p /var/www/html
 cd /var/www/html
-
-sudo wget -q https://wordpress.org/latest.tar.gz
+sudo wget https://wordpress.org/latest.tar.gz
 sudo tar -xzf latest.tar.gz
 sudo mv wordpress/* .
 sudo rm -rf wordpress latest.tar.gz
@@ -23,13 +22,9 @@ sudo sed -i "s/username_here/$DBUser/" wp-config.php
 sudo sed -i "s/password_here/$DBPassword/" wp-config.php
 sudo sed -i "s/localhost/$DBHost/" wp-config.php
 
-sudo curl -s https://api.wordpress.org/secret-key/1.1/salt/ | sudo tee -a wp-config.php > /dev/null
-
 sudo usermod -a -G apache ec2-user
 sudo chown -R ec2-user:apache /var/www/html
-sudo chmod 2775 /var/www/html
-sudo find /var/www/html -type d -exec chmod 2775 {} \;
-sudo find /var/www/html -type f -exec chmod 0664 {} \;
+sudo chmod -R 775 /var/www/html
 
 sudo systemctl restart httpd
 echo "✅ WordPress setup complete (connected to RDS)"
