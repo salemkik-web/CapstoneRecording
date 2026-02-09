@@ -28,7 +28,7 @@ resource "aws_launch_template" "lt" {
     db_name     = var.db_name
     db_user     = var.db_user
     db_password = var.db_password
-    db_host     = aws_db_instance.db.address
+    db_host     = aws_db_instance.wordpress.endpoint
   }))
 }
 

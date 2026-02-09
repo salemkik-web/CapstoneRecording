@@ -43,13 +43,15 @@ resource "aws_security_group" "ec2_sg" {
 }
 
 resource "aws_security_group" "rds_sg" {
-  vpc_id = aws_vpc.main.id
+  name        = "rds-sg"
+  description = "Allow MySQL from WordPress EC2"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.ec2_sg.id]
+    security_groups = [aws_security_group.ec2_sg.id]  # WordPress EC2 SG
   }
 
   egress {
@@ -59,6 +61,7 @@ resource "aws_security_group" "rds_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
 
 # Bastion Security Group
 resource "aws_security_group" "bastion_sg" {
