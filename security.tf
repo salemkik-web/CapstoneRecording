@@ -1,3 +1,4 @@
+# Security Group for Web Servers (EC2 / ASG)
 resource "aws_security_group" "web_sg" {
   name   = "web-sg"
   vpc_id = aws_vpc.main.id
@@ -17,15 +18,16 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-resource "aws_security_group" "bastion_sg" {
-  name   = "bastion-sg"
+# Security Group for ALB
+resource "aws_security_group" "alb_sg" {
+  name   = "alb-sg"
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["YOUR_PUBLIC_IP/32"]  # Replace with your IP
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -36,6 +38,7 @@ resource "aws_security_group" "bastion_sg" {
   }
 }
 
+# Security Group for RDS
 resource "aws_security_group" "rds_sg" {
   name   = "rds-sg"
   vpc_id = aws_vpc.main.id
@@ -45,6 +48,26 @@ resource "aws_security_group" "rds_sg" {
     to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.web_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Security Group for Bastion Host
+resource "aws_security_group" "bastion_sg" {
+  name   = "bastion-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["95.81.31.212/32"]  # Replace with your actual public IP
   }
 
   egress {

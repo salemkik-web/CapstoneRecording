@@ -1,6 +1,6 @@
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt-"
-  image_id      = data.aws_ami.amazon_linux_2.id  # Reuse same AMI
+  image_id      = data.aws_ami.amazon_linux_2.id
   instance_type = var.instance_type
   key_name      = var.key_name
   vpc_security_group_ids = [aws_security_group.web_sg.id]
