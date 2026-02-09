@@ -11,12 +11,7 @@ data "aws_ami" "amazon" {
 resource "aws_launch_template" "lt" {
   image_id      = data.aws_ami.amazon.id
   instance_type = var.instance_type
-
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
-
-  iam_instance_profile {
-    name = "LabRole"
-  }
 
   user_data = base64encode(templatefile("${path.module}/userdata.sh", {
     db_name     = var.db_name
@@ -31,7 +26,7 @@ resource "aws_autoscaling_group" "asg" {
   min_size            = 1
   max_size            = 2
   vpc_zone_identifier = aws_subnet.private[*].id
-  target_group_arns  = [aws_lb_target_group.tg.arn]
+  target_group_arns   = [aws_lb_target_group.tg.arn]
 
   launch_template {
     id      = aws_launch_template.lt.id
@@ -48,8 +43,6 @@ resource "aws_autoscaling_policy" "cpu" {
     predefined_metric_specification {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
-
     target_value = 50.0
   }
 }
-
