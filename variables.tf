@@ -37,3 +37,4 @@ variable "db_password" {
 variable "my_ip" {
   description = "95.81.31.212/32"
   default     = "95.81.31.212/32"
+}
