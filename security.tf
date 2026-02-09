@@ -30,7 +30,6 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.allowed_ssh_ip]
     security_groups = [aws_security_group.bastion_sg.id]
   }
 
