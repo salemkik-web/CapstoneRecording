@@ -30,6 +30,7 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
+    cidr_blocks = [var.allowed_ssh_ip]
     security_groups = [aws_security_group.bastion_sg.id]
   }
 
@@ -69,7 +70,7 @@ resource "aws_security_group" "bastion_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = "95.81.31.212"# Replace with your public IP
+    cidr_blocks = ["95.81.31.212/32"] # Replace with your public IP
   }
 
   egress {
