@@ -10,5 +10,6 @@ resource "aws_nat_gateway" "nat" {
 }
 
 resource "aws_eip" "nat" {
-  vpc = true
+ # VPC argument removed
+  depends_on = [aws_internet_gateway.igw]
 }
