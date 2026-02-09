@@ -40,6 +40,7 @@ resource "aws_autoscaling_group" "asg" {
 }
 
 resource "aws_autoscaling_policy" "cpu" {
+  name                   = "cpu-target-tracking-policy"
   policy_type            = "TargetTrackingScaling"
   autoscaling_group_name = aws_autoscaling_group.asg.name
 
@@ -47,6 +48,8 @@ resource "aws_autoscaling_policy" "cpu" {
     predefined_metric_specification {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
-    target_value = 50
+
+    target_value = 50.0
   }
 }
+
