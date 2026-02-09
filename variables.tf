@@ -11,7 +11,7 @@ variable "private_subnets" {
 }
 
 variable "allowed_ssh_ip" {
-  description = "Your IP"
+  description = "95.81.31.212"
   default     = "1.2.3.4/32"
 }
 
