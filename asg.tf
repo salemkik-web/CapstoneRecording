@@ -37,14 +37,14 @@ resource "aws_launch_template" "lt" {
 #############################
 resource "aws_autoscaling_group" "asg" {
   name                      = "wordpress-asg"
-  desired_capacity           = 1
-  min_size                   = 1
-  max_size                   = 2
-  vpc_zone_identifier        = aws_subnet.private[*].id
-  target_group_arns          = [aws_lb_target_group.tg.arn]
-  health_check_type          = "EC2"
-  health_check_grace_period  = 120
-  force_delete               = true
+  desired_capacity          = 1
+  min_size                  = 1
+  max_size                  = 2
+  vpc_zone_identifier       = aws_subnet.private[*].id
+  target_group_arns         = [aws_lb_target_group.tg.arn]
+  health_check_type         = "EC2"
+  health_check_grace_period = 120
+  force_delete              = true
 
   launch_template {
     id      = aws_launch_template.lt.id
