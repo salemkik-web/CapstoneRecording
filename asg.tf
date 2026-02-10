@@ -1,5 +1,4 @@
 
-
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt"
   image_id      = data.aws_ami.amazon_linux2.id

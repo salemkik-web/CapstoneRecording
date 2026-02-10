@@ -12,16 +12,19 @@ resource "aws_lb_target_group" "wp_tg" {
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
-  target_type = "instance" # since your ASG will attach EC2 instances
+  target_type = "instance"
+
   health_check {
     path                = "/"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    matcher             = "200-399"
+    matcher             = "200"
   }
 }
+
+
 
 
 resource "aws_lb_listener" "http" {
