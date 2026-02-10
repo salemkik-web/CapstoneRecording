@@ -7,7 +7,7 @@ resource "aws_security_group" "alb_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # ALB open to internet
+    cidr_blocks = ["0.0.0.0/0"]  
   }
 
   egress {
@@ -18,24 +18,25 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
-# EC2 Security Group
+# EC2 (WordPress) Security Group
 resource "aws_security_group" "ec2_sg" {
   name   = "ec2-sg"
   vpc_id = aws_vpc.main.id
 
+  # HTTP from ALB only
   ingress {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb_sg.id]  # Allow traffic from ALB
-   
+    security_groups = [aws_security_group.alb_sg.id]
   }
 
+  # SSH from Bastion only
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.my_ip]  # SSH access from your IP
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion_sg.id]
   }
 
   egress {
@@ -51,12 +52,12 @@ resource "aws_security_group" "rds_sg" {
   name   = "rds-sg"
   vpc_id = aws_vpc.main.id
 
+  # MySQL from EC2 only
   ingress {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.ec2_sg.id]  # Only EC2 can connect
-    
+    security_groups = [aws_security_group.ec2_sg.id]
   }
 
   egress {
@@ -67,7 +68,7 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-
+# Bastion Security Group
 resource "aws_security_group" "bastion_sg" {
   name        = "bastion-sg"
   description = "Allow SSH from my IP"
@@ -92,4 +93,3 @@ resource "aws_security_group" "bastion_sg" {
     Name = "bastion-sg"
   }
 }
-

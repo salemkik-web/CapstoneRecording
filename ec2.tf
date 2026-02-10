@@ -14,8 +14,15 @@ resource "aws_launch_template" "lt" {
   }))
 }
 
+
+
+
 resource "aws_autoscaling_group" "asg" {
-  depends_on = [aws_nat_gateway.nat]
+  depends_on = [
+    aws_nat_gateway.nat,
+    aws_db_instance.wordpress
+  ]
+
   launch_template {
     id      = aws_launch_template.lt.id
     version = "$Latest"
@@ -25,8 +32,15 @@ resource "aws_autoscaling_group" "asg" {
   min_size         = 1
   max_size         = 2
 
-  vpc_zone_identifier = [aws_subnet.private1.id, aws_subnet.private2.id]
-  target_group_arns   = [aws_lb_target_group.wp_tg.arn]
+  vpc_zone_identifier = [
+    aws_subnet.private1.id,
+    aws_subnet.private2.id
+  ]
+
+  target_group_arns = [aws_lb_target_group.wp_tg.arn]
+
+  health_check_type         = "ELB"
+  health_check_grace_period = 300   # ⭐ VERY IMPORTANT
 
   tag {
     key                 = "Name"
@@ -35,11 +49,16 @@ resource "aws_autoscaling_group" "asg" {
   }
 }
 
+
+
+
+
+
 resource "aws_autoscaling_policy" "scale_out" {
   name                   = "scale-out-policy"
   autoscaling_group_name = aws_autoscaling_group.asg.name
   policy_type            = "TargetTrackingScaling"
-  estimated_instance_warmup = 30
+  estimated_instance_warmup = 120
 
   target_tracking_configuration {
     predefined_metric_specification {
@@ -48,3 +67,4 @@ resource "aws_autoscaling_policy" "scale_out" {
     target_value = 50.0
   }
 }
+

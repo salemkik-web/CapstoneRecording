@@ -14,15 +14,19 @@ resource "aws_lb_target_group" "wp_tg" {
   vpc_id      = aws_vpc.main.id
   target_type = "instance"
 
+  deregistration_delay = 30   # ⭐ helps clean shutdown
+
   health_check {
     path                = "/"
+    protocol            = "HTTP"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
-    matcher             = "200"
+    matcher             = "200-399"   # ⭐ WordPress redirects = OK
   }
 }
+
 
 
 
@@ -37,3 +41,4 @@ resource "aws_lb_listener" "http" {
     target_group_arn = aws_lb_target_group.wp_tg.arn
   }
 }
+
