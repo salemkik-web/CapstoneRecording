@@ -1,4 +1,4 @@
-
+# Launch Template for WordPress EC2 instances
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt"
   image_id      = data.aws_ami.amazon_linux2.id
@@ -6,17 +6,23 @@ resource "aws_launch_template" "lt" {
   key_name      = var.key_name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
+  # Use the fixed userdata.sh
   user_data = base64encode(templatefile("${path.module}/userdata.sh", {
     db_name     = var.db_name
     db_user     = var.db_user
     db_password = var.db_password
     db_host     = aws_db_instance.wordpress.endpoint
   }))
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "WordPress-EC2"
+    }
+  }
 }
 
-
-
-
+# Auto Scaling Group
 resource "aws_autoscaling_group" "asg" {
   depends_on = [
     aws_nat_gateway.nat,
@@ -40,7 +46,7 @@ resource "aws_autoscaling_group" "asg" {
   target_group_arns = [aws_lb_target_group.wp_tg.arn]
 
   health_check_type         = "ELB"
-  health_check_grace_period = 300   # ⭐ VERY IMPORTANT
+  health_check_grace_period = 300  # Give EC2 + WordPress enough time to start
 
   tag {
     key                 = "Name"
@@ -49,11 +55,7 @@ resource "aws_autoscaling_group" "asg" {
   }
 }
 
-
-
-
-
-
+# Scaling Policy (optional)
 resource "aws_autoscaling_policy" "scale_out" {
   name                   = "scale-out-policy"
   autoscaling_group_name = aws_autoscaling_group.asg.name
@@ -67,4 +69,3 @@ resource "aws_autoscaling_policy" "scale_out" {
     target_value = 50.0
   }
 }
-
