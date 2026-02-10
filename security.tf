@@ -73,3 +73,26 @@ resource "aws_security_group" "alb_sg" {
 
   tags = { Name = "alb-sg" }
 }
+resource "aws_security_group" "bastion_sg" {
+  name        = "bastion-sg"
+  description = "Allow SSH access to bastion"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # or restrict to your IP for security
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "bastion-sg"
+  }
+}
