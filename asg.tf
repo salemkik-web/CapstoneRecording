@@ -1,3 +1,12 @@
+data "aws_ami" "amazon_linux2" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt"
   image_id      = data.aws_ami.amazon_linux2.id
@@ -11,4 +20,39 @@ resource "aws_launch_template" "lt" {
     db_password = var.db_password
     db_host     = aws_db_instance.wordpress.endpoint
   }))
+}
+
+resource "aws_autoscaling_group" "asg" {
+  depends_on = [aws_nat_gateway.nat]
+  launch_template {
+    id      = aws_launch_template.lt.id
+    version = "$Latest"
+  }
+
+  desired_capacity = 1
+  min_size         = 1
+  max_size         = 2
+
+  vpc_zone_identifier = [aws_subnet.private1.id, aws_subnet.private2.id]
+  target_group_arns   = [aws_lb_target_group.wp_tg.arn]
+
+  tag {
+    key                 = "Name"
+    value               = "AutoScale-WordPress"
+    propagate_at_launch = true
+  }
+}
+
+resource "aws_autoscaling_policy" "scale_out" {
+  name                   = "scale-out-policy"
+  autoscaling_group_name = aws_autoscaling_group.asg.name
+  policy_type            = "TargetTrackingScaling"
+  estimated_instance_warmup = 30
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 50.0
+  }
 }

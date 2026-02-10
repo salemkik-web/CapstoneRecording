@@ -1,8 +1,8 @@
 resource "aws_lb" "alb" {
-  name                     = "wp-alb"
-  load_balancer_type        = "application"
-  security_groups           = [aws_security_group.alb_sg.id]
-  subnets                   = [aws_subnet.public1.id, aws_subnet.public2.id]
+  name               = "wp-alb"
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = [aws_subnet.public1.id, aws_subnet.public2.id]
   enable_deletion_protection = false
   tags = { Name = "wp-alb" }
 }
@@ -13,20 +13,6 @@ resource "aws_lb_target_group" "wp_tg" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "instance"
-}
-
-resource "aws_autoscaling_group" "asg" {
-  desired_capacity    = 1
-  max_size            = 2
-  min_size            = 1
-  vpc_zone_identifier = [aws_subnet.private1.id, aws_subnet.private2.id]
-
-  launch_template {
-    id      = aws_launch_template.lt.id
-    version = "$Latest"
-  }
-
-  target_group_arns = [aws_lb_target_group.wp_tg.arn]
 }
 
 resource "aws_lb_listener" "http" {
