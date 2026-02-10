@@ -23,4 +23,7 @@ resource "aws_db_instance" "wordpress" {
   publicly_accessible   = false
   multi_az              = false
   storage_type          = "gp2"
+  tags = {
+    Name = "WordPress RDS"
+  }
 }

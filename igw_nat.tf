@@ -14,6 +14,16 @@ resource "aws_eip" "nat" {
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public1.id
-  depends_on    = [aws_internet_gateway.igw]
-  tags          = { Name = "nat-gateway" }
+
+  depends_on = [
+    aws_internet_gateway.igw,
+    aws_eip.nat
+  ]
+
+  tags = { Name = "nat-gateway" }
+
+  timeouts {
+    create = "15m"
+    delete = "15m"
+  }
 }
