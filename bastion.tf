@@ -3,7 +3,7 @@ resource "aws_instance" "bastion" {
   instance_type = var.instance_type
   subnet_id     = aws_subnet.public1.id
   key_name      = var.key_name
-  security_groups = [aws_security_group.bastion_sg.id]
+  vpc_security_group_ids = [aws_security_group.bastion_sg.id]
 
   tags = { Name = "bastion-host" }
 }

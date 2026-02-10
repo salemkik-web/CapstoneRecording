@@ -1,13 +1,19 @@
 # Internet Gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
-  tags   = { Name = "lab-igw" }
+
+  tags = {
+    Name = "lab-igw"
+  }
 }
 
-# Elastic IP for NAT
+# Elastic IP for NAT Gateway
 resource "aws_eip" "nat" {
   domain = "vpc"
-  tags   = { Name = "nat-eip" }
+
+  tags = {
+    Name = "nat-eip"
+  }
 }
 
 # NAT Gateway in public subnet1
@@ -20,7 +26,9 @@ resource "aws_nat_gateway" "nat" {
     aws_eip.nat
   ]
 
-  tags = { Name = "nat-gateway" }
+  tags = {
+    Name = "nat-gateway"
+  }
 
   timeouts {
     create = "15m"
