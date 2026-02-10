@@ -18,11 +18,18 @@ DBHost="${db_host}"
 sleep 10
 
 # Download and extract WordPress
-sudo wget http://wordpress.org/latest.tar.gz -P /var/www/html
 cd /var/www/html
-sudo tar -zxvf latest.tar.gz
-sudo cp -rvf wordpress/* .
+sudo wget https://wordpress.org/latest.tar.gz
+sudo tar -xzf latest.tar.gz
+sudo cp -r wordpress/* .
 sudo rm -rf wordpress latest.tar.gz
+sudo chown -R apache:apache /var/www/html
+sudo chmod -R 755 /var/www/html
+
+
+
+
+
 
 # Configure WordPress to use RDS
 sudo cp wp-config-sample.php wp-config.php
