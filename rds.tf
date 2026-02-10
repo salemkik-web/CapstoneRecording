@@ -1,15 +1,9 @@
-resource "aws_db_subnet_group" "wordpress" {
-  name       = "wordpress-db-subnet-group"
-  subnet_ids = [aws_subnet.private.id]
-  tags       = { Name = "WordPress DB Subnet Group" }
-}
-
 resource "aws_db_instance" "wordpress" {
   allocated_storage    = 20
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t3.micro"
-  name                 = var.db_name
+  db_name              = var.db_name        # <-- correct
   username             = var.db_user
   password             = var.db_password
   db_subnet_group_name = aws_db_subnet_group.wordpress.name
@@ -18,5 +12,11 @@ resource "aws_db_instance" "wordpress" {
   publicly_accessible  = false
   multi_az             = false
   storage_type         = "gp2"
-  tags                 = { Name = "wordpress-db" }
+  tags = {
+    Name = "wordpress-db"
+  }
+}
+# Output the endpoint
+output "rds_endpoint" {
+  value = aws_db_instance.mysql.endpoint
 }
