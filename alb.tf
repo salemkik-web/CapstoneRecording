@@ -1,11 +1,19 @@
+
+
 resource "aws_lb" "alb" {
   name               = "wp-alb"
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [aws_subnet.public.id]
+  subnets            = [
+    aws_subnet.public.id,
+    aws_subnet.public2.id
+  ]
   enable_deletion_protection = false
   tags = { Name = "wp-alb" }
 }
+
+
+
 
 resource "aws_lb_target_group" "tg" {
   name        = "wp-tg"

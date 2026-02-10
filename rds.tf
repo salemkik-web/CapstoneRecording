@@ -3,9 +3,13 @@
 # DB Subnet Group
 resource "aws_db_subnet_group" "wordpress" {
   name       = "wordpress-db-subnet-group"
-  subnet_ids = [aws_subnet.private.id]
-  tags       = { Name = "WordPress DB Subnet Group" }
+  subnet_ids = [
+    aws_subnet.private.id,
+    aws_subnet.private2.id
+  ]
+  tags = { Name = "WordPress DB Subnet Group" }
 }
+
 
 resource "aws_db_instance" "wordpress" {
   allocated_storage    = 20
