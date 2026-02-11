@@ -11,7 +11,7 @@ user_data = base64encode(templatefile("userdata.sh", {
     db_name     = var.db_name
     db_user     = var.db_user
     db_password = var.db_password
-    db_host     = aws_db_instance.wordpress.endpoint
+    db_host     = aws_db_instance.wordpress.address
   }))
 
   tag_specifications {
@@ -20,6 +20,8 @@ user_data = base64encode(templatefile("userdata.sh", {
       Name = "WordPress-EC2"
     }
   }
+  depends_on = [aws_db_instance.wordpress]
+
 }
 
 # Auto Scaling Group
