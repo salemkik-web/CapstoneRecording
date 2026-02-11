@@ -9,7 +9,7 @@ resource "aws_instance" "bastion" {
 }
 
 
-resource "aws_instance" "test_ec2" {
+/* resource "aws_instance" "test_ec2" {
   ami           = data.aws_ami.amazon_linux2.id # Amazon Linux 2 in us-east-1
   instance_type = var.instance_type
   subnet_id     = aws_subnet.public1.id
@@ -30,3 +30,4 @@ user_data = base64encode(templatefile("userdata.sh", {
     Name = "Test-UserData-EC2"
   }
 }
+ */

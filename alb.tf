@@ -26,8 +26,8 @@ resource "aws_lb_target_group" "wp_tg" {
     protocol            = "HTTP"
     interval            = 30
     timeout             = 10
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
+    healthy_threshold   = 5              # Require 5 consecutive successes
+    unhealthy_threshold = 3              # Mark unhealthy after 3 failures
     matcher             = "200-399"      # ✅ allows WordPress redirects
   }
 }

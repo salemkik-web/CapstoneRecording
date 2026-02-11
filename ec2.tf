@@ -46,7 +46,7 @@ resource "aws_autoscaling_group" "asg" {
   target_group_arns = [aws_lb_target_group.wp_tg.arn]
 
   health_check_type         = "ELB"
-  health_check_grace_period = 300  # Give EC2 + WordPress enough time to start
+  health_check_grace_period = 600  # Give EC2 + WordPress enough time to start
 
   tag {
     key                 = "Name"

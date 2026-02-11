@@ -35,30 +35,61 @@ DBHost="${db_host}"
 
 # Wait for RDS to be reachable
 echo "Waiting for RDS at $DBHost..."
-for i in {1..20}; do
-  mysql -h "$DBHost" -u "$DBUser" -p"$DBPassword" -e "SHOW DATABASES;" && break
+echo "Waiting for RDS at $DBHost..."
+until mysql -h "$DBHost" -u "$DBUser" -p"$DBPassword" -e "CREATE DATABASE IF NOT EXISTS $DBName;" >/dev/null 2>&1; do
+  echo "$(date) - RDS not ready yet, retrying in 15s..."
   sleep 15
 done
+echo "RDS is reachable and DB exists!"
 
-echo "RDS is reachable!"
 
 # Navigate to web root
 cd /var/www/html
 
 # Download and extract WordPress
 echo "Downloading WordPress..."
-wget https://wordpress.org/latest.tar.gz
-tar -xzf latest.tar.gz
+for i in {1..5}; do
+  wget https://wordpress.org/latest.tar.gz && break
+  echo "$(date) - Download failed, retrying in 10s..."
+  sleep 10
+done
+
+for i in {1..3}; do
+  tar -xzf latest.tar.gz && break
+  echo "$(date) - Extraction failed, retrying in 5s..."
+  sleep 5
+done
 cp -r wordpress/* .
 rm -rf wordpress latest.tar.gz
 
 # Configure WordPress
 echo "Configuring wp-config.php..."
-cp wp-config-sample.php wp-config.php
-sed -i "s/database_name_here/$DBName/g" wp-config.php
-sed -i "s/username_here/$DBUser/g" wp-config.php
-sed -i "s/password_here/$DBPassword/g" wp-config.php
-sed -i "s/localhost/$DBHost/g" wp-config.php
+if [ ! -f wp-config.php ]; then
+  cp wp-config-sample.php wp-config.php
+  sed -i "s/database_name_here/$DBName/g" wp-config.php
+  sed -i "s/username_here/$DBUser/g" wp-config.php
+  sed -i "s/password_here/$DBPassword/g" wp-config.php
+  sed -i "s/localhost/$DBHost/g" wp-config.php
+fi
+
+# Wait until WordPress is ready
+echo "Waiting for WordPress to be ready..."
+until curl -s http://localhost/index.php >/dev/null 2>&1; do
+  echo "$(date) - WordPress not ready yet, retrying in 10s..."
+  sleep 10
+done
+echo "WordPress is ready!"
+
+sleep 10
+
+# Optional DB connection test from WordPress
+echo "Testing WordPress DB connection..."
+until php -r "include 'wp-config.php'; \$link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME) or exit(1);" >/dev/null 2>&1; do
+  echo "$(date) - WordPress DB connection not ready, retrying..."
+  sleep 10
+done
+echo "WordPress DB connection successful!"
+
 
 # Set correct permissions
 echo "Setting file permissions..."
