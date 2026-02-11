@@ -21,9 +21,6 @@ yum install -y httpd mod_ssl php php-cli php-mysqlnd php-gd php-curl php-mbstrin
 # Start and enable Apache
 systemctl start httpd
 systemctl enable httpd
-ALB_DNS="${alb_dns}"
-echo "Using ALB DNS: $ALB_DNS"
-
 # Ensure Apache listens on all interfaces
 sed -i 's/^Listen .*/Listen 0.0.0.0:80/' /etc/httpd/conf/httpd.conf
 systemctl restart httpd

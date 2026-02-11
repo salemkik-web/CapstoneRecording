@@ -38,6 +38,3 @@ variable "my_ip" {
   description = "195.123.104.174/32"
   default     = "195.123.104.174/32"
 }
-variable "alb_dns_name" {
-  type = string
-}
