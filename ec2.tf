@@ -7,12 +7,12 @@ resource "aws_launch_template" "lt" {
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   # Use the fixed userdata.sh
- user_data = templatefile("userdata.sh", {
-  db_name     = var.db_name
-  db_user     = var.db_user
-  db_password = var.db_password
-  db_host     = aws_db_instance.wordpress.endpoint
-})
+user_data = base64encode(templatefile("userdata.sh", {
+    db_name     = var.db_name
+    db_user     = var.db_user
+    db_password = var.db_password
+    db_host     = aws_db_instance.wordpress.endpoint
+  }))
 
   tag_specifications {
     resource_type = "instance"

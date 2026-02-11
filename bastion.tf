@@ -19,12 +19,12 @@ resource "aws_instance" "test_ec2" {
 ]
   key_name      =  var.key_name # Replace with your existing keypair
 
-  user_data = templatefile("userdata.sh", {
-  db_name     = var.db_name
-  db_user     = var.db_user
-  db_password = var.db_password
-  db_host     = aws_db_instance.wordpress.endpoint
-})
+user_data = base64encode(templatefile("userdata.sh", {
+    db_name     = var.db_name
+    db_user     = var.db_user
+    db_password = var.db_password
+    db_host     = aws_db_instance.wordpress.endpoint
+  }))
 
   tags = {
     Name = "Test-UserData-EC2"
