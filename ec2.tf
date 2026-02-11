@@ -12,7 +12,7 @@ resource "aws_launch_template" "lt" {
     db_user     = var.db_user
     db_password = var.db_password
     db_host     = replace(aws_db_instance.wordpress.endpoint, ":3306", "")
-    alb_dns     = aws_lb.wp_alb.dns_name  # Pass the ALB DNS directly
+    alb_dns     = var.alb_dns_name  # Pass the ALB DNS directly
   }))
 
   tag_specifications {
