@@ -6,34 +6,36 @@ set -e
 echo "Starting userdata script..."
 
 # Update OS
-sudo yum update -y
+yum update -y
 
-sudo yum install -y mariadb
+# Install MariaDB client (for RDS connectivity)
+yum install -y mariadb
 
 # Enable PHP 8 via Amazon Linux Extras (Amazon Linux 2 only)
-sudo amazon-linux-extras enable php8.0
-sudo yum clean metadata
+amazon-linux-extras enable php8.0
+yum clean metadata
 
 # Install Apache, PHP, required PHP extensions, and tools
-sudo yum install -y httpd mod_ssl php php-cli php-mysqlnd php-gd php-curl php-mbstring php-xml php-json wget unzip curl
+yum install -y httpd mod_ssl php php-cli php-mysqlnd php-gd php-curl php-mbstring php-xml php-json wget unzip curl
 
 # Start and enable Apache
-sudo systemctl start httpd
-sudo systemctl enable httpd
+systemctl start httpd
+systemctl enable httpd
 
 # Ensure Apache listens on all interfaces
-sudo sed -i 's/^Listen .*/Listen 0.0.0.0:80/' /etc/httpd/conf/httpd.conf
-sudo systemctl restart httpd
+sed -i 's/^Listen .*/Listen 0.0.0.0:80/' /etc/httpd/conf/httpd.conf
+systemctl restart httpd
 
 # Remove default Apache test page and welcome.conf
-sudo rm -f /var/www/html/index.html
-sudo rm -f /etc/httpd/conf.d/welcome.conf
+rm -f /var/www/html/index.html
+rm -f /etc/httpd/conf.d/welcome.conf
 
 # Terraform-provided DB variables
 DBName="${db_name}"
 DBUser="${db_user}"
 DBPassword="${db_password}"
-DBHost="${db_host}"
+DBHost="${db_host%%:*}"  # remove :3306 if present
+ALB_DNS="${alb_dns_name}" # pass your ALB DNS from Terraform
 
 # Wait for RDS to be reachable
 echo "Waiting for RDS at $DBHost..."
@@ -46,37 +48,54 @@ echo "RDS is reachable and DB exists!"
 # Navigate to web root
 cd /var/www/html
 
+# Download WordPress with retry logic
 echo "Downloading WordPress..."
 for i in {1..5}; do
   curl -fL https://wordpress.org/latest.tar.gz -o latest.tar.gz && break
-  echo "Retry $i failed... waiting 10s"
+  echo "Retry $i failed, waiting 10s..."
   sleep 10
+  if [ $i -eq 5 ]; then
+    echo "Failed to download WordPress. Exiting."
+    exit 1
+  fi
 done
 
+# Extract WordPress
 for i in {1..3}; do
-  sudo tar -xzf latest.tar.gz && break
+  tar -xzf latest.tar.gz && break
   echo "$(date) - Extraction failed, retrying in 5s..."
   sleep 5
+  if [ $i -eq 3 ]; then
+    echo "WordPress extraction failed. Exiting."
+    exit 1
+  fi
 done
 
-# CLEAN + MOVE WORDPRESS (FIXED LOGIC)
+# Move WordPress files
 if [ -d wordpress ]; then
-  sudo rm -rf /var/www/html/*
-  sudo mv wordpress/* /var/www/html/
-  sudo rm -rf wordpress latest.tar.gz
+  rm -rf /var/www/html/*
+  mv wordpress/* /var/www/html/
+  rm -rf wordpress latest.tar.gz
 else
   echo "WordPress directory not found. Download or extract failed."
   exit 1
 fi
+
 # Configure WordPress
 echo "Configuring wp-config.php..."
 if [ ! -f wp-config.php ]; then
-  sudo cp wp-config-sample.php wp-config.php
-  sudo sed -i "s/database_name_here/$DBName/g" wp-config.php
-  sudo sed -i "s/username_here/$DBUser/g" wp-config.php
-  sudo sed -i "s/password_here/$DBPassword/g" wp-config.php
-  sudo sed -i "s/localhost/$DBHost/g" wp-config.php
+  cp wp-config-sample.php wp-config.php
+  sed -i "s/database_name_here/$DBName/g" wp-config.php
+  sed -i "s/username_here/$DBUser/g" wp-config.php
+  sed -i "s/password_here/$DBPassword/g" wp-config.php
+  sed -i "s/localhost/$DBHost/g" wp-config.php
 fi
+
+# Install WP-CLI
+echo "Installing WP-CLI..."
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mv wp-cli.phar /usr/local/bin/wp
 
 # Wait until WordPress is ready
 echo "Waiting for WordPress to be ready..."
@@ -86,7 +105,10 @@ until curl -s http://localhost/index.php >/dev/null 2>&1; do
 done
 echo "WordPress is ready!"
 
-sleep 10
+# Set siteurl and home to ALB DNS
+echo "Configuring siteurl and home..."
+wp option update siteurl "http://$ALB_DNS" --allow-root
+wp option update home "http://$ALB_DNS" --allow-root
 
 # Test DB connection
 echo "Testing WordPress DB connection..."
@@ -98,11 +120,11 @@ echo "WordPress DB connection successful!"
 
 # Set correct permissions
 echo "Setting file permissions..."
-sudo chown -R apache:apache /var/www/html
-sudo find /var/www/html -type d -exec chmod 755 {} \;
-sudo find /var/www/html -type f -exec chmod 644 {} \;
+chown -R apache:apache /var/www/html
+find /var/www/html -type d -exec chmod 755 {} \;
+find /var/www/html -type f -exec chmod 644 {} \;
 
 # Restart Apache
-sudo systemctl restart httpd
+systemctl restart httpd
 
 echo "Userdata script completed successfully!"
