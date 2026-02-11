@@ -12,7 +12,7 @@ resource "aws_db_subnet_group" "wordpress" {
 resource "aws_db_instance" "wordpress" {
   allocated_storage     = 20
   engine                = "mysql"
-  engine_version        = "8.0"
+  engine_version        = "8.4.7"
   instance_class        = "db.t3.micro"
   db_name               = var.db_name
   username              = var.db_user
@@ -26,4 +26,12 @@ resource "aws_db_instance" "wordpress" {
   tags = {
     Name = "WordPress RDS"
   }
+
+   # Ensure subnet group and SG exist first
+  depends_on = [
+    aws_db_subnet_group.wordpress,
+    aws_security_group.rds_sg
+  ]
 }
+
+
