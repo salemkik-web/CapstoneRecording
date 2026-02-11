@@ -39,8 +39,8 @@ resource "aws_autoscaling_group" "asg" {
   max_size         = 2
 
   vpc_zone_identifier = [
-    aws_subnet.private1.id,
-    aws_subnet.private2.id
+    aws_subnet.public1.id,
+    aws_subnet.public2.id
   ]
 
   target_group_arns = [aws_lb_target_group.wp_tg.arn]

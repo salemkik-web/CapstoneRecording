@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 # Log all output for debugging
 exec > /var/log/user-data.log 2>&1
@@ -23,8 +23,9 @@ systemctl enable httpd
 sed -i 's/^Listen .*/Listen 0.0.0.0:80/' /etc/httpd/conf/httpd.conf
 systemctl restart httpd
 
-# Remove default Apache test page
+# Remove default Apache test page and welcome.conf
 rm -f /var/www/html/index.html
+rm -f /etc/httpd/conf.d/welcome.conf
 
 # Terraform-provided DB variables
 DBName="${db_name}"
@@ -36,7 +37,7 @@ DBHost="${db_host}"
 echo "Waiting for RDS at $DBHost..."
 until mysql -h "$DBHost" -u "$DBUser" -p"$DBPassword" -e "SHOW DATABASES;" ; do
     echo "RDS not ready, retrying in 15 seconds..."
-    sleep 15
+    sleep 30
 done
 echo "RDS is reachable!"
 
