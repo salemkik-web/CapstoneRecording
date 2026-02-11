@@ -7,7 +7,7 @@ resource "aws_launch_template" "lt" {
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
   # Use the fixed userdata.sh
-  user_data = base64encode(templatefile("${path.module}/userdata.sh", {
+  user_data = base64encode(templatefile("userdata.sh", {
     db_name     = var.db_name
     db_user     = var.db_user
     db_password = var.db_password
@@ -39,8 +39,8 @@ resource "aws_autoscaling_group" "asg" {
   max_size         = 2
 
   vpc_zone_identifier = [
-    aws_subnet.public1.id,
-    aws_subnet.public2.id
+    aws_subnet.private1.id,
+    aws_subnet.private2.id
   ]
 
   target_group_arns = [aws_lb_target_group.wp_tg.arn]

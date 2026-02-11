@@ -35,10 +35,11 @@ DBHost="${db_host}"
 
 # Wait for RDS to be reachable
 echo "Waiting for RDS at $DBHost..."
-until mysql -h "$DBHost" -u "$DBUser" -p"$DBPassword" -e "SHOW DATABASES;" ; do
-    echo "RDS not ready, retrying in 15 seconds..."
-    sleep 30
+for i in {1..20}; do
+  mysql -h "$DBHost" -u "$DBUser" -p"$DBPassword" -e "SHOW DATABASES;" && break
+  sleep 15
 done
+
 echo "RDS is reachable!"
 
 # Navigate to web root
