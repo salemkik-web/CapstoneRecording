@@ -34,8 +34,7 @@ DBName="${db_name}"
 DBUser="${db_user}"
 DBPassword="${db_password}"
 DBHost="${db_host}"
-ALB_DNS="${alb_dns_name}" # pass your ALB DNS from Terraform
-
+ 
 # Wait for RDS to be reachable
 echo "Waiting for RDS at $DBHost..."
 until mysql -h "$DBHost" -u "$DBUser" -p"$DBPassword" -e "CREATE DATABASE IF NOT EXISTS $DBName;" >/dev/null 2>&1; do
