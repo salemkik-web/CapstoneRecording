@@ -33,7 +33,7 @@ rm -f /etc/httpd/conf.d/welcome.conf
 DBName="${db_name}"
 DBUser="${db_user}"
 DBPassword="${db_password}"
-DBHost="${db_host%%:*}"  # remove :3306 if present
+DBHost="\${db_host%%:*}"  # Terraform leaves it as-is
 ALB_DNS="${alb_dns_name}" # pass your ALB DNS from Terraform
 
 # Wait for RDS to be reachable
