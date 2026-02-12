@@ -1,5 +1,4 @@
 # Launch Template for WordPress EC2 instances
-# Launch Template for WordPress EC2
 resource "aws_launch_template" "lt" {
   name_prefix   = "wp-lt"
   image_id      = data.aws_ami.amazon_linux2.id
@@ -12,7 +11,7 @@ resource "aws_launch_template" "lt" {
     db_user     = var.db_user
     db_password = var.db_password
     db_host     = replace(aws_db_instance.wordpress.endpoint, ":3306", "")
-
+    alb_dns     = aws_lb.wp_alb.dns_name
   }))
 
   tag_specifications {
@@ -22,8 +21,12 @@ resource "aws_launch_template" "lt" {
     }
   }
 
-  depends_on = [aws_db_instance.wordpress]
+  depends_on = [
+    aws_db_instance.wordpress,
+    aws_lb.wp_alb
+  ]
 }
+
 
 
 # Auto Scaling Group

@@ -34,7 +34,8 @@ DBName="${db_name}"
 DBUser="${db_user}"
 DBPassword="${db_password}"
 DBHost="${db_host}"
- 
+ ALB_DNS="${alb_dns}"
+
 # Wait for RDS to be reachable
 echo "Waiting for RDS at $DBHost..."
 until mysql -h "$DBHost" -u "$DBUser" -p"$DBPassword" -e "CREATE DATABASE IF NOT EXISTS $DBName;" >/dev/null 2>&1; do
@@ -69,15 +70,17 @@ for i in {1..3}; do
   fi
 done
 
-# Move WordPress files
+
+# Move WordPress files safely
 if [ -d wordpress ]; then
   rm -rf /var/www/html/*
-  mv wordpress/* /var/www/html/
+  rsync -av wordpress/ /var/www/html/
   rm -rf wordpress latest.tar.gz
 else
-  echo "WordPress directory not found. Download or extract failed."
+  echo "WordPress directory not found. Exiting."
   exit 1
 fi
+
 
 # Configure WordPress
 echo "Configuring wp-config.php..."
@@ -103,11 +106,6 @@ until curl -s http://localhost/index.php >/dev/null 2>&1; do
 done
 echo "WordPress is ready!"
 
-# Set siteurl and home to ALB DNS
-echo "Configuring siteurl and home..."
-wp option update siteurl "http://$ALB_DNS" --allow-root
-wp option update home "http://$ALB_DNS" --allow-root
-
 # Test DB connection
 echo "Testing WordPress DB connection..."
 until php -r "include 'wp-config.php'; \$link = @mysqli_connect('$DBHost', '$DBUser', '$DBPassword', '$DBName') or exit(1);" >/dev/null 2>&1; do
@@ -115,6 +113,16 @@ until php -r "include 'wp-config.php'; \$link = @mysqli_connect('$DBHost', '$DBU
   sleep 10
 done
 echo "WordPress DB connection successful!"
+
+# Wait until WordPress DB is reachable
+until wp db check --allow-root >/dev/null 2>&1; do
+  echo "$(date) - WordPress DB not ready for WP-CLI, retrying..."
+  sleep 10
+done
+
+# Then set siteurl and home
+wp option update siteurl "http://$ALB_DNS" --allow-root
+wp option update home "http://$ALB_DNS" --allow-root
 
 # Set correct permissions
 echo "Setting file permissions..."
